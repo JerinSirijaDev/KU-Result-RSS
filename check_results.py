@@ -21,7 +21,7 @@ from feedgen.feed import FeedGenerator
 # ---- Config ----------------------------------------------------------
 
 RESULTS_URL = "https://exams.keralauniversity.ac.in/Login/check8"
-KEYWORD = "SDE"                 # only keep entries containing this
+KEYWORD = ["SDE","Computer Science"]                 # only keep entries containing this
 STATE_FILE = Path("last_seen.json")
 FEED_FILE = Path("feed.xml")
 
@@ -176,10 +176,16 @@ def main():
     html = fetch_page(RESULTS_URL)
     all_entries = parse_entries(html)
 
-    matched = [e for e in all_entries if KEYWORD.lower() in e["title"].lower()]
+    keyword_lower = [k.lower() for k in KEYWORD]
+    matched = [
+        e for e in all_entries
+        if all(k in e["title"].lower() for k in keyword_lower) 
+        #if ^ you want to match all keywords stay with 'all'.
+        #if you want to match any keyword use 'any' instead of 'all' 
+    ]   
 
     if not matched:
-        print("No SDE entries found on the page at all — selectors may need adjusting.")
+        print("No entries found on the page at all — selectors may need adjusting.")
         sys.exit(0)
 
     seen = load_seen()
@@ -197,7 +203,7 @@ def main():
     save_seen(seen)
 
     build_feed(matched)
-    print(f"Feed written to {FEED_FILE} with {len(matched)} SDE entries.")
+    print(f"Feed written to {FEED_FILE} with {len(matched)} entries.")
 
 
 if __name__ == "__main__":

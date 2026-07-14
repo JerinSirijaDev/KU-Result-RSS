@@ -1,13 +1,10 @@
-# Kerala University SDE Results RSS Feed
+# Kerala University Results RSS Feed
 
 Watches the [Kerala University results page](https://exams.keralauniversity.ac.in/Login/check8)
 and turns matching result notifications into an RSS feed. Runs on GitHub's
-free infrastructure no server or always-on computer needed.
+free infrastructure.
 
-By default it watches for the keyword `SDE`, but you can change it to
-anything (see below).
-
-## Setup
+## Make your own KU results RSS feed
 
 1. **Clone this repo:**
    ```bash
@@ -20,7 +17,7 @@ anything (see below).
    python -m pip install -r requirements.txt
    ```
 
-3. **Set your feed URL** - edit this line in `check_results.py`:
+3. **Set your feed URL**, then edit this line in `check_results.py`:
    ```python
    FEED_SELF_LINK = "https://YOUR-USERNAME.github.io/YOUR-REPO/feed.xml"
    ```
@@ -41,36 +38,44 @@ anything (see below).
    ```
    https://YOUR-USERNAME.github.io/YOUR-REPO/feed.xml
    ```
-   Subscribe to that URL in any RSS reader (Feedly, NetNewsWire, etc.)
+   Subscribe to that URL in any RSS reader (Feeder ,Feedly, etc.)
 
 ## How it works
 
-- Runs on a schedule via GitHub Actions (default: every 4 hours -
+- Runs on a schedule via GitHub Actions (default: every 4 hours, 
   change the `cron` line in `.github/workflows/check.yml` to adjust).
 - Fetches the results page and extracts every entry.
-- Keeps only entries whose title contains the configured keyword.
+- Keeps only entries whose title contains **every** keyword listed in
+  `KEYWORDS` (all must match, not just one).
 - Tracks already-seen entries in `last_seen.json` so nothing gets
   re-notified twice.
 - Rebuilds `feed.xml` every run so the feed always reflects the current
   matching entries.
 
-## Changing the keyword
+## Changing the keywords
 
 Edit this line in `check_results.py`:
 ```python
-KEYWORD = "SDE"
-```
-For example, to watch for BCA results instead:
-```python
-KEYWORD = "BCA"
+KEYWORDS = ["SDE","Computer Science"]
 ```
 
+A result must contain all listed keywords to be included.
+Use a single-item list (e.g. ["SDE"]) to match on just one keyword.
+Add more items to require multiple keywords together — for example, ["SDE", "B.Com"] would only match results that mention both.
+Matching is case-insensitive.
+Want matches on any keyword instead of requiring all of them? 
+In check_results.py, inside main(), change 'all' to 'any' in this line: 
+```python
+if all(k in e["title"].lower() for k in keywords_lower)
+```
 ## If parsing breaks
 
-University sites occasionally change their HTML. If the script starts
-finding 0 matches or titles look garbled:
+Kerala University may occasionally change their HTML layout. If the
+script starts finding 0 matches or titles look garbled:
 
 1. Run it locally: `python check_results.py`
 2. View the live page's HTML source around a result entry.
 3. Adjust the extraction logic in `parse_entries()` inside
    `check_results.py` to match the new structure.
+
+>This is built specifically for [Kerala University results page](https://exams.keralauniversity.ac.in/Login/check8)
