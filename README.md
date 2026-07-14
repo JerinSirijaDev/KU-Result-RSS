@@ -59,12 +59,11 @@ Edit this line in `check_results.py`:
 KEYWORDS = ["SDE","Computer Science"]
 ```
 
-A result must contain all listed keywords to be included.
-Use a single-item list (e.g. ["SDE"]) to match on just one keyword.
-Add more items to require multiple keywords together — for example, ["SDE", "B.Com"] would only match results that mention both.
-Matching is case-insensitive.
-Want matches on any keyword instead of requiring all of them? 
-In check_results.py, inside main(), change 'all' to 'any' in this line: 
+- A result must contain all listed keywords to be included.
+- Use a single-item list (e.g. ["SDE"]) to match on just one keyword.
+- Add more items to require multiple keywords together<br>for example, ["SDE", "B.Com"] would only match results that mention both.
+- Matching is case-insensitive.
+- Want matches on any keyword instead of requiring all of them? <br>In check_results.py, inside main(), change 'all' to 'any' in this line: 
 ```python
 if all(k in e["title"].lower() for k in keywords_lower)
 ```

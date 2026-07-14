@@ -179,7 +179,7 @@ def main():
     keyword_lower = [k.lower() for k in KEYWORD]
     matched = [
         e for e in all_entries
-        if all(k in e["title"].lower() for k in keyword_lower) 
+        if any(k in e["title"].lower() for k in keyword_lower) 
         #if ^ you want to match all keywords stay with 'all'.
         #if you want to match any keyword use 'any' instead of 'all' 
     ]   
