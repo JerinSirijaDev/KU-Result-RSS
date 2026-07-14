@@ -27,7 +27,7 @@ FEED_FILE = Path("feed.xml")
 
 # Base URL your GitHub Pages site will be served at.
 # e.g. https://<username>.github.io/<repo-name>/
-FEED_SELF_LINK = "https://YOUR-USERNAME.github.io/KU-Result-RSS/feed.xml"
+FEED_SELF_LINK = "https://JerinSirijaDev.github.io/KU-Result-RSS/feed.xml"
 SITE_LINK = "https://exams.keralauniversity.ac.in/Login/check8"
 
 HEADERS = {
