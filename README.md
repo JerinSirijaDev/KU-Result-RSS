@@ -45,7 +45,7 @@ anything (see below).
 
 ## How it works
 
-- Runs on a schedule via GitHub Actions (default: every 12 hours -
+- Runs on a schedule via GitHub Actions (default: every 4 hours -
   change the `cron` line in `.github/workflows/check.yml` to adjust).
 - Fetches the results page and extracts every entry.
 - Keeps only entries whose title contains the configured keyword.
