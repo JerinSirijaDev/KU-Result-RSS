@@ -1,0 +1,33 @@
+name: Check KU SDE Results
+
+on:
+  schedule:
+    - cron: '0,30 * * * *'   # every 30 minutes
+  workflow_dispatch: {}       # allows manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run crawler
+        run: python check_results.py
+
+      - name: Commit updated feed and state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add feed.xml last_seen.json
+          git diff --quiet --cached || git commit -m "Update feed [automated]"
+          git push
