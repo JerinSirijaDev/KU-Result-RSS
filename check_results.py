@@ -25,8 +25,6 @@ KEYWORD = "SDE"                 # only keep entries containing this
 STATE_FILE = Path("last_seen.json")
 FEED_FILE = Path("feed.xml")
 
-# Base URL your GitHub Pages site will be served at.
-# e.g. https://<username>.github.io/<repo-name>/
 FEED_SELF_LINK = "https://JerinSirijaDev.github.io/KU-Result-RSS/feed.xml"
 SITE_LINK = "https://exams.keralauniversity.ac.in/Login/check8"
 
@@ -61,11 +59,6 @@ def parse_entries(html: str):
     """
     soup = BeautifulSoup(html, "html.parser")
 
-    # The results are inside list items / bullet-like blocks under the
-    # "Results" heading. We work at a coarse level: iterate over every
-    # element that either contains a "Published on" date or a PDF link,
-    # in document order, using find_all on <li> first, falling back to
-    # generic block tags if the site doesn't use <li>.
     container = soup.find(["ul", "ol", "div"], recursive=True) or soup
 
     blocks = soup.find_all(["li", "tr", "p", "div"])
@@ -76,7 +69,7 @@ def parse_entries(html: str):
     current_date = None
     seen_pdf_urls_this_pass = set()
 
-    # Fallback / primary approach: scan all <a> tags with result PDF links
+    # Primary approach: scan all <a> tags with result PDF links
     # directly, and derive title + date from surrounding text.
     for a in soup.find_all("a", href=True):
         href = a["href"]
@@ -203,9 +196,6 @@ def main():
     seen.update(e["pdf_url"] for e in matched)
     save_seen(seen)
 
-    # Rebuild the feed from all matched entries seen historically.
-    # We only have "matched" from the current page load, but that's fine —
-    # the site keeps a rolling history of recent results across pages.
     build_feed(matched)
     print(f"Feed written to {FEED_FILE} with {len(matched)} SDE entries.")
 

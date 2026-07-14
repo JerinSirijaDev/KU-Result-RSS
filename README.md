@@ -1,39 +1,43 @@
-# Kerala University SDE Results — RSS Feed
+# Kerala University SDE Results RSS Feed
 
-Watches https://exams.keralauniversity.ac.in/Login/check8 and produces
-an RSS feed containing only result notifications whose title contains
-`SDE`. Runs entirely on GitHub's free infrastructure — no server, no
-always-on computer needed.
+Watches the [Kerala University results page](https://exams.keralauniversity.ac.in/Login/check8)
+and turns matching result notifications into an RSS feed. Runs on GitHub's
+free infrastructure no server or always-on computer needed.
 
-## Setup (one-time)
+By default it watches for the keyword `SDE`, but you can change it to
+anything (see below).
 
-1. **Create a new GitHub repo** (public is simplest — e.g. `ku-sde-rss`).
+## Setup
 
-2. **Push these files** to it:
+1. **Clone this repo:**
+   ```bash
+   git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
+   cd YOUR-REPO
    ```
-   check_results.py
-   requirements.txt
-   .github/workflows/check.yml
+
+2. **Install dependencies:**
+   ```bash
+   python -m pip install -r requirements.txt
    ```
 
-3. **Edit `check_results.py`**: replace
+3. **Set your feed URL** - edit this line in `check_results.py`:
    ```python
    FEED_SELF_LINK = "https://YOUR-USERNAME.github.io/YOUR-REPO/feed.xml"
    ```
-   with your actual GitHub username and repo name.
 
-4. **Enable GitHub Pages**:
-   Repo → Settings → Pages → Source: `Deploy from a branch` → Branch: `main` / root.
+4. **Push to your own GitHub repo.**
 
-5. **Enable Actions write permission**:
+5. **Enable GitHub Pages:**
+   Repo → Settings → Pages → Source: Deploy from a branch → `main` / root.
+
+6. **Enable Actions write access:**
    Repo → Settings → Actions → General → Workflow permissions →
-   select "Read and write permissions". (Needed so the workflow can
-   commit the updated feed.xml back to the repo.)
+   "Read and write permissions."
 
-6. **Trigger it once manually** to generate the first `feed.xml`:
+7. **Run it once manually** to generate the first feed:
    Repo → Actions tab → "Check KU SDE Results" → Run workflow.
 
-7. Wait a minute, then your feed will be live at:
+8. **Your feed is now live at:**
    ```
    https://YOUR-USERNAME.github.io/YOUR-REPO/feed.xml
    ```
@@ -41,29 +45,32 @@ always-on computer needed.
 
 ## How it works
 
-- Runs every 30 minutes via GitHub Actions cron (`.github/workflows/check.yml`).
-- Fetches the results page, extracts every entry, filters for `SDE`
-  (case-insensitive substring match) in the title.
-- Tracks which PDF links have already been seen in `last_seen.json`
-  (committed back to the repo each run) so re-runs don't re-notify.
-- Rebuilds `feed.xml` from all currently-matched entries on the page
-  each run — so your reader always has an accurate, deduplicated list.
-
-## If parsing breaks
-
-University sites occasionally tweak their HTML. If `check_results.py`
-starts finding 0 SDE entries, or titles look garbled:
-
-1. Run it locally: `python check_results.py` and check the printed output.
-2. Inspect the live page's HTML (`view-source:` in browser) around a
-   result entry, and adjust the parsing logic in `parse_entries()`
-   in `check_results.py` — specifically how titles and dates are
-   located relative to each PDF link.
+- Runs on a schedule via GitHub Actions (default: every 12 hours -
+  change the `cron` line in `.github/workflows/check.yml` to adjust).
+- Fetches the results page and extracts every entry.
+- Keeps only entries whose title contains the configured keyword.
+- Tracks already-seen entries in `last_seen.json` so nothing gets
+  re-notified twice.
+- Rebuilds `feed.xml` every run so the feed always reflects the current
+  matching entries.
 
 ## Changing the keyword
 
-To watch for a different keyword instead of `SDE`, edit this line in
-`check_results.py`:
+Edit this line in `check_results.py`:
 ```python
 KEYWORD = "SDE"
 ```
+For example, to watch for BCA results instead:
+```python
+KEYWORD = "BCA"
+```
+
+## If parsing breaks
+
+University sites occasionally change their HTML. If the script starts
+finding 0 matches or titles look garbled:
+
+1. Run it locally: `python check_results.py`
+2. View the live page's HTML source around a result entry.
+3. Adjust the extraction logic in `parse_entries()` inside
+   `check_results.py` to match the new structure.
