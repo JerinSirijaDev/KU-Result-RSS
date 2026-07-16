@@ -2,7 +2,7 @@ name: Check KU SDE Results
 
 on:
   schedule:
-    - cron: '0 0,4 * * *'   # checks every 4 hours
+    - cron: '0 */4 * * *'  # checks every 4 hours
   workflow_dispatch: {}       # for manual trigger from the Actions tab
 
 permissions:
