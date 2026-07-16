@@ -21,7 +21,7 @@ from feedgen.feed import FeedGenerator
 # ---- Config ----------------------------------------------------------
 
 RESULTS_URL = "https://exams.keralauniversity.ac.in/Login/check8"
-KEYWORD = ["SDE","Computer","degree"]                 # only keep entries containing this
+KEYWORD = ["SDE","Computer","DEGREE","COMPUTER"]                 # only keep entries containing this
 STATE_FILE = Path("last_seen.json")
 FEED_FILE = Path("feed.xml")
 
