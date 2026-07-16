@@ -40,6 +40,12 @@ free infrastructure.
    ```
    Subscribe to that URL in any RSS reader (Feeder ,Feedly, etc.)
 
+   For example mine is : 
+   ```
+   https://jerinsirijadev.github.io/KU-Result-RSS/feed.xml
+   ```
+
+
 ## How it works
 
 - Runs on a schedule via GitHub Actions (default: every 4 hours, 
