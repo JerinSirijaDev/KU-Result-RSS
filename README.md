@@ -1,8 +1,7 @@
 # Kerala University Results RSS Feed
 
 Watches the [Kerala University results page](https://exams.keralauniversity.ac.in/Login/check8)
-and turns matching result notifications into an RSS feed. Runs on GitHub's
-free infrastructure.
+and turns matching result notifications into an RSS feed.
 
 ## Make your own KU results RSS feed
 

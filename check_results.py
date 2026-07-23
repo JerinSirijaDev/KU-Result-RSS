@@ -1,12 +1,3 @@
-"""
-Kerala University SDE Results Watcher
---------------------------------------
-Fetches the results listing page, extracts individual result entries
-(title + PDF link + published date), filters for entries containing
-'SDE', and maintains an RSS feed of matches only.
-
-Run this script on a schedule (see .github/workflows/check.yml).
-"""
 
 import json
 import re
@@ -18,10 +9,9 @@ import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 
-# ---- Config ----------------------------------------------------------
 
 RESULTS_URL = "https://exams.keralauniversity.ac.in/Login/check8"
-KEYWORD = ["SDE","Computer","DEGREE","COMPUTER"]                 # only keep entries containing this
+KEYWORD = ["SDE"]                 # only keep entries containing this
 STATE_FILE = Path("last_seen.json")
 FEED_FILE = Path("feed.xml")
 
@@ -39,8 +29,6 @@ HEADERS = {
 DATE_RE = re.compile(r"Published on\s*(\d{2}/\d{2}/\d{4})", re.IGNORECASE)
 PDF_HREF_RE = re.compile(r"/Images/Result/", re.IGNORECASE)
 
-
-# ---- Fetch + parse -----------------------------------------------------
 
 def fetch_page(url: str) -> str:
     resp = requests.get(url, headers=HEADERS, timeout=30)
@@ -69,8 +57,7 @@ def parse_entries(html: str):
     current_date = None
     seen_pdf_urls_this_pass = set()
 
-    # Primary approach: scan all <a> tags with result PDF links
-    # directly, and derive title + date from surrounding text.
+    
     for a in soup.find_all("a", href=True):
         href = a["href"]
         if not PDF_HREF_RE.search(href):
@@ -79,33 +66,28 @@ def parse_entries(html: str):
             continue
         seen_pdf_urls_this_pass.add(href)
 
-        # Walk up to a reasonably-sized container to grab surrounding text
+       
         parent = a.find_parent(["li", "tr", "p", "div"]) or a.parent
         block_text = parent.get_text(separator=" ", strip=True) if parent else a.get_text(strip=True)
 
-        # Update current_date if this block (or the text just before it
-        # in the page) mentions a date.
+       
         date_match = DATE_RE.search(block_text)
         if date_match:
             current_date = date_match.group(1)
         else:
-            # look backwards through preceding siblings for the last
-            # "Published on" text if this block doesn't have its own
+           
             prev = parent.find_previous(string=DATE_RE) if parent else None
             if prev:
                 m = DATE_RE.search(str(prev))
                 if m:
                     current_date = m.group(1)
 
-        # Clean title: strip the "Published on ..." fragment, the link's
-        # own visible text (often the raw PDF URL itself on this site),
-        # and any other http(s) URL substrings, then collapse whitespace.
         title = DATE_RE.sub("", block_text)
         link_text = a.get_text(strip=True)
         if link_text:
             title = title.replace(link_text, "")
         title = title.replace(href, "")
-        title = re.sub(r"https?://\S+", "", title)  # catch-all for stray URLs
+        title = re.sub(r"https?://\S+", "", title) 
         title = re.sub(r"\s+", " ", title).strip(" -")
 
         pdf_url = href if href.startswith("http") else f"https://exams.keralauniversity.ac.in{href}"
@@ -117,9 +99,6 @@ def parse_entries(html: str):
         })
 
     return entries
-
-
-# ---- State handling ------------------------------------------------------
 
 def load_seen() -> set:
     if STATE_FILE.exists():
@@ -133,8 +112,6 @@ def load_seen() -> set:
 def save_seen(seen: set) -> None:
     STATE_FILE.write_text(json.dumps(sorted(seen), indent=2))
 
-
-# ---- RSS feed ------------------------------------------------------------
 
 def load_or_create_feed() -> FeedGenerator:
     fg = FeedGenerator()
@@ -159,7 +136,7 @@ def build_feed(matched_entries):
         fe.link(href=entry["pdf_url"])
         fe.guid(entry["pdf_url"], permalink=True)
         fe.description(entry["title"])
-        # feedgen needs a real datetime; use published_date if parseable
+   
         try:
             dt = datetime.strptime(entry["published_date"], "%d/%m/%Y").replace(
                 tzinfo=timezone.utc
@@ -170,8 +147,6 @@ def build_feed(matched_entries):
     fg.rss_file(str(FEED_FILE))
 
 
-# ---- Main ------------------------------------------------------------
-
 def main():
     html = fetch_page(RESULTS_URL)
     all_entries = parse_entries(html)
@@ -179,7 +154,7 @@ def main():
     keyword_lower = [k.lower() for k in KEYWORD]
     matched = [
         e for e in all_entries
-        if any(k in e["title"].lower() for k in keyword_lower) 
+        if all(k in e["title"].lower() for k in keyword_lower) 
         #if ^ you want to match all keywords stay with 'all'.
         #if you want to match any keyword use 'any' instead of 'all' 
     ]   
@@ -198,13 +173,11 @@ def main():
     else:
         print("No new SDE results since last check.")
 
-    # Update seen-set with everything currently matched (dedupes across runs)
     seen.update(e["pdf_url"] for e in matched)
     save_seen(seen)
 
     build_feed(matched)
     print(f"Feed written to {FEED_FILE} with {len(matched)} entries.")
-
 
 if __name__ == "__main__":
     main()
