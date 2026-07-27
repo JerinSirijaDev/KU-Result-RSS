@@ -11,7 +11,7 @@ from feedgen.feed import FeedGenerator
 
 
 RESULTS_URL = "https://exams.keralauniversity.ac.in/Login/check8"
-KEYWORD = ["SDE"]                 # only keep entries containing this
+KEYWORD = ["COMPUTER SCIENCE"]                 # only keep entries containing this
 STATE_FILE = Path("last_seen.json")
 FEED_FILE = Path("feed.xml")
 
@@ -28,7 +28,6 @@ HEADERS = {
 
 DATE_RE = re.compile(r"Published on\s*(\d{2}/\d{2}/\d{4})", re.IGNORECASE)
 PDF_HREF_RE = re.compile(r"/Images/Result/", re.IGNORECASE)
-
 
 def fetch_page(url: str) -> str:
     resp = requests.get(url, headers=HEADERS, timeout=30)
